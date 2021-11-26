@@ -87,7 +87,7 @@ int myabs(int n)   //절댓값 반환 함수
 }
 int MakingObs(int func, int n)   //장애물 생성 함수
 {
-    int i, j, ObsN, X, Y;   //ObsN: 장애물 개수, (X, Y): 장애물 위치
+    int i, j, ObsN = 0, X, Y;   //ObsN: 장애물 개수, (X, Y): 장애물 위치
 
     switch (func) {   //0: 랜덤한 위치에 랜덤한 개수의 장애물을 설치. 1: 랜덤한 위치에 n개의 장애물을 설치. 2: 맵을 사용자에게 입력받음.
     case 0:
@@ -223,7 +223,7 @@ void PrintMap()   //맵 출력 함수
         for (j = 0; j <= TY; j++) {
             switch (ObsArr[i][j]) {
             case 0:
-                printf("□ ");   //빈 공간
+                printf("□");   //빈 공간
                 break;
             case 1:
                 printf("+ ");   //장애물
@@ -232,7 +232,7 @@ void PrintMap()   //맵 출력 함수
                 printf("G ");   //목표 지점
                 break;
             case 3:
-                printf("■ ");   //길
+                printf("■");   //길
                 break;
             case 4:
                 printf("# ");   //시작 지점
@@ -461,13 +461,12 @@ void TSP(int start, City city[], int number, int sum, int now)
 
 
 //-------------- Main ----------------
-int main() {
+void AlgorithmSelect() {
     int algorithmMode = 0;
     printf("1: A* Algorithm\n2: BFS Algorithm\n3: TSP 문제\n입력 ==> ");
     scanf("%d", &algorithmMode);
 
     if (algorithmMode == 1) {
-        srand(time(NULL));   //난수 설정
         StartAstarAlgorithm();   //A*알고리즘
     }
 
@@ -480,8 +479,11 @@ int main() {
         printf("전체 경로의 개수: %d\n", totalCount);
         printf("최소 거리: %d", min);
     }
+}
 
+int main() {
+    srand((int)time(NULL));   //난수 설정
+    AlgorithmSelect();
     getch(); // exe파일
-
     return 0;
 }
