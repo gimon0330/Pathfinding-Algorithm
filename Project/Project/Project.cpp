@@ -12,7 +12,7 @@
 #define TX 19   //맵 크기
 #define TY 19
 
-#define QueueSize 1000   //큐 크기
+#define QueueSize 10000   //큐 크기
 
 int N, M;
 
@@ -36,10 +36,24 @@ typedef struct {
     int MomLocationX;
     int MomLocationY;
 } RouteArr;   //맵 F, G, H, 부모를 저장하는 구조체
+
+typedef struct {
+    int Length;
+    int MomLocationX;
+    int MomLocationY;
+} dj_RouteArr;   //맵 Length 부모를 저장하는 구조체
+
+dj_RouteArr dj_routearr[TX + 1][TY + 1];
+
 RouteArr routearr[TX + 1][TY + 1];
+
+clock_t clock_start, clock_end;   //시간 측정 구조체
+double res; //시간 저장 변수
+
 IntQueue Queue[4];   //열린 공간, 닫힌 공간 큐 생성
 int StartX, StartY, TargetX, TargetY;   //시작 위치, 목표 위치
 int PathX, PathY;   //길 위치
+
 //-----------변수와 구조체------------
 
 //-----------------큐-----------------
@@ -289,6 +303,8 @@ void StartAstarAlgorithm()   //A* 알고리즘 시작!
     if (MakingObsFunc == 1)
         scanf("%d", &ObsNum);
 
+    clock_start = clock();   //시작!
+
     ObsNum = MakingObs(MakingObsFunc, ObsNum);   //장애물 생성 및 개수 저장
     MakingQueue();   //열린 공간 닫힌 공간 생성
     Enque(&Queue[2], StartX);   //닫힌 공간에 시작 지점을 추가
@@ -316,10 +332,123 @@ void StartAstarAlgorithm()   //A* 알고리즘 시작!
 
     for (i = 0; i < 4; i++)   //큐 동적 배열 해제
         Terminate(&Queue[i]);
+
+    clock_end = clock();   //종료!
+    res = (double)(clock_end - clock_start) / CLOCKS_PER_SEC;   //CLOCKS_PER_SEC는 시간 단위로 상수
+    printf("\n%lf초\n", res);
 }
 //-------------A*알고리즘-------------
 
 
+//-------------Djikstra
+int DjLengthnum(int i, int j, int x, int y)   //Length값 계산에서 반환하는 함수
+{
+    if (i * j == 0)
+        return dj_routearr[x][y].Length + 10;   //상하좌우는 10반환
+    else
+        return dj_routearr[x][y].Length + 14;   //대각선은 14반환
+}
+void DjSearchArea(int x, int y)   //가능한 위치 탐색 및 입력 함수
+{
+    int i, j;
+
+    for (i = -1; i < 2; i++) {   //한 칸 주위의 칸 모두 탐색
+        for (j = -1; j < 2; j++) {
+            if ((i != 0 || j != 0) && x + i >= 0 && x + i < TX + 1 && y + j >= 0 && y + j < TY + 1) {
+                if (IsBlocked(x + i, y + j))
+                    continue;
+                else if (IsInClose(x + i, y + j))   //닫힌 공간에 이미 있는가?
+                    continue;
+                else if (IsInOpen(x + i, y + j)) {   //열린 공간에 이미 있는가?
+                    int CpL = DjLengthnum(i, j, x, y);   //비교 Length값
+                    if (dj_routearr[x + i][y + j].Length > CpL) {   //비교 Length값이 원래 Length값보다 더 작으면 수정
+                        dj_routearr[x + i][y + j].Length = CpL;   //Length값 저장
+                        dj_routearr[x + i][y + j].MomLocationX = x;   //부모 x값 저장
+                        dj_routearr[x + i][y + j].MomLocationY = y;   //부모 y값 저장
+                    }
+                }
+                else {   //없는가?
+                    Enque(&Queue[0], x + i);   //없으면 열린 공간에 추가
+                    Enque(&Queue[1], y + j);
+                    dj_routearr[x + i][y + j].Length = DjLengthnum(i, j, x, y);   //Length값 저장
+                    dj_routearr[x + i][y + j].MomLocationX = x;   //부모 x값 저장
+                    dj_routearr[x + i][y + j].MomLocationY = y;   //부모 y값 저장
+                }
+            }
+        }
+    }
+}
+int DikstraAlgorithm()
+{
+    int i;
+
+    for (i = 0; i <= Queue[0].num; i++) {
+        if (i == Queue[0].num)   //탐색할 위치가 없으면 -1반환
+            return -1;
+        if (Queue[0].que[i] != -1) {
+            if (Queue[0].que[i] == TargetX && Queue[1].que[i] == TargetY) {   //목표 위치에 도달했을 경우 종료
+                PathX = TargetX;   //길 저장
+                PathY = TargetY;
+                return 1;
+            }
+            SearchArea(Queue[0].que[i], Queue[1].que[i]);   //열린 공간에 있는 것 탐색
+            Enque(&Queue[2], Queue[0].que[i]);   //닫힌 공간에 추가
+            Enque(&Queue[3], Queue[1].que[i]);
+            Queue[0].que[i] = -1;   //열린 공간에서 삭제
+            Queue[0].que[i] = -1;
+        }
+    }
+    return 0;
+}
+void StartDikstraAlgorithm()
+{
+    int i, IsBlock, ObsNum = 0, PX, PY, MakingObsFunc;   //막혀있으면 -1, 길이 있으면 1이 저장됨, 장애물 개수, 임시 길 위치 저장
+    /*
+        장애물 설치 유형
+        0: 랜덤한 개수로 랜덤하게 장애물 설치
+        1: 주어진 개수로 랜덤하게 장애물 설치
+        2: 사용자가 직접 입력
+    */
+
+    scanf("%d %d %d %d", &StartX, &StartY, &TargetX, &TargetY);   //시작위치와 목표 위치
+    scanf("%d", &MakingObsFunc);
+    if (MakingObsFunc == 1)
+        scanf("%d", &ObsNum);
+
+    clock_start = clock();   //시작!
+
+    ObsNum = MakingObs(MakingObsFunc, ObsNum);   //장애물 생성 및 개수 저장
+    MakingQueue();   //열린 공간 닫힌 공간 생성
+    Enque(&Queue[0], StartX);   //열린 공간에 시작 지점을 추가
+    Enque(&Queue[1], StartY);
+
+    IsBlock = DikstraAlgorithm();   //다익스트라 알고리즘 시작!
+
+    if (IsBlock == -1)   //막혔으면 막혔다고 출력
+        puts("Is Blocked");
+    else {
+        while (1) {
+            PX = PathX, PY = PathY;   //임시 대입
+            if (PathX == StartX && PathY == StartY)   //출발 위치로 되도라 오면 끝
+                break;
+            ObsArr[PathX][PathY] = 3;   //길 표시
+            PathX = dj_routearr[PX][PY].MomLocationX;   //부모 위치로 다시 갱신
+            PathY = dj_routearr[PX][PY].MomLocationY;
+        }
+        ObsArr[StartX][StartY] = 4;   //출발 지점은 4, 목표 지점은 5로 표시
+        ObsArr[TargetX][TargetY] = 5;
+    }
+
+    printf("%d\n", ObsNum);
+    PrintMap();   //맵 출력
+
+    for (i = 0; i < 4; i++)   //큐 동적 배열 해제
+        Terminate(&Queue[i]);
+
+    clock_end = clock();   //종료!
+    res = (double)(clock_end - clock_start) / CLOCKS_PER_SEC;   //CLOCKS_PER_SEC는 시간 단위로 상수
+    printf("\n%lf초\n", res);
+}
 
 
 //-------------BFS Queue----------------
@@ -350,7 +479,6 @@ void enque(int x_, int y_) {
 
 //----------------BFS Algorithm-------------
 void BFS() {
-
     scanf("%d %d", &M, &N);
 
     for (int i = 1; i <= M; i++) {
@@ -362,6 +490,8 @@ void BFS() {
     visit[1][1] = 1;
     enque(1, 1);
     
+    clock_start = clock();   //시작!
+
     int nextX, nextY;
     while (head != tail) { //큐가 비었을때까지 황인한다.
 
@@ -391,6 +521,10 @@ void BFS() {
         }
         printf("\n");
     }
+
+    clock_end = clock();   //종료!
+    res = (double)(clock_end - clock_start) / CLOCKS_PER_SEC;   //CLOCKS_PER_SEC는 시간 단위로 상수
+    printf("\n%lf초\n", res);
 }
 
 
@@ -463,7 +597,7 @@ void TSP(int start, City city[], int number, int sum, int now)
 //-------------- Main ----------------
 void AlgorithmSelect() {
     int algorithmMode = 0;
-    printf("1: A* Algorithm\n2: BFS Algorithm\n3: TSP 문제\n입력 ==> ");
+    printf("1: A* Algorithm\n2: BFS Algorithm\n3: TSP 문제\n4: Djikstra Algorithm\n입력 ==> ");
     scanf("%d", &algorithmMode);
 
     if (algorithmMode == 1) {
@@ -478,6 +612,10 @@ void AlgorithmSelect() {
         TSP(0, city, NUMBER, 0, 0);
         printf("전체 경로의 개수: %d\n", totalCount);
         printf("최소 거리: %d", min);
+    }
+
+    else if (algorithmMode == 4) {
+        StartDikstraAlgorithm();
     }
 }
 
