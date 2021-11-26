@@ -11,9 +11,9 @@ https://github.com/gimon0330/Pathfinding-Algorithm/blob/main/BFS.c
 Made by. 10214 안강현
 
 ## Djikstra Algorithm
-https://github.com/lemonoyaa/PathFinding-Algorithm/blob/main/DikstraAlgorithm.c
+https://github.com/lemonoyaa/PathFinding-Algorithm/blob/main/DikstraAlgorithm.c  
 Made by. 10220 최호진
 
 ## TSP 문제
-https://github.com/gimon0330/Pathfinding-Algorithm/blob/main/TSP.c
+https://github.com/gimon0330/Pathfinding-Algorithm/blob/main/TSP.c  
 Made by. 10213 신지호
