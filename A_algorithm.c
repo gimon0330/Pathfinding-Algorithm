@@ -27,6 +27,8 @@ RouteArr routearr[TX+1][TY+1];
 IntQueue Queue[4];   //열린 공간, 닫힌 공간 큐 생성
 int StartX, StartY, TargetX, TargetY;   //시작 위치, 목표 위치
 int PathX, PathY;   //길 위치
+cloct_t start, end;   //시간 측정 구조체
+double res;   //걸린 시간을 저장할
 //-----------변수와 구조체------------
 
 
@@ -280,6 +282,8 @@ void StartAstarAlgorithm()   //A* 알고리즘 시작!
     if(MakingObsFunc==1)
         scanf("%d", &ObsNum);
     
+    start = clock();   //시작!
+    
     ObsNum = MakingObs(MakingObsFunc, ObsNum);   //장애물 생성 및 개수 저장
     MakingQueue();   //열린 공간 닫힌 공간 생성
     Enque(&Queue[2], StartX);   //닫힌 공간에 시작 지점을 추가
@@ -307,6 +311,10 @@ void StartAstarAlgorithm()   //A* 알고리즘 시작!
     
     for(i=0; i<4; i++)   //큐 동적 배열 해제
         Terminate(&Queue[i]);
+    
+    end = clock();   //종료!
+    res = (double)(end-start)/CLOCKS_PER_SEC;   //CLOCKS_PER_SEC는 시간 단위로 상수
+    printf("\n%lf초", res);
 }
 //-------------A*알고리즘-------------
 
