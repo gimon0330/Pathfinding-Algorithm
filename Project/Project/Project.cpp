@@ -463,7 +463,7 @@ void TSP(int start, City city[], int number, int sum, int now)
 //-------------- Main ----------------
 int main() {
     int algorithmMode = 0;
-    printf("1: A* Algorithm\n2: BFS Algorithm\n입력 ==> ");
+    printf("1: A* Algorithm\n2: BFS Algorithm\n3: TSP 문제\n입력 ==> ");
     scanf("%d", &algorithmMode);
 
     if (algorithmMode == 1) {
