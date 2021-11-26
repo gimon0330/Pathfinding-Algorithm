@@ -481,5 +481,7 @@ int main() {
         printf("최소 거리: %d", min);
     }
 
+    getch(); // exe파일
+
     return 0;
 }
