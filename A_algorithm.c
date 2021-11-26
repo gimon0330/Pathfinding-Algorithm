@@ -27,7 +27,7 @@ RouteArr routearr[TX+1][TY+1];
 IntQueue Queue[4];   //열린 공간, 닫힌 공간 큐 생성
 int StartX, StartY, TargetX, TargetY;   //시작 위치, 목표 위치
 int PathX, PathY;   //길 위치
-cloct_t start, end;   //시간 측정 구조체
+clock_t start, end;   //시간 측정 구조체
 double res;   //걸린 시간을 저장할
 //-----------변수와 구조체------------
 
