@@ -3,7 +3,7 @@
 조원 : 10204 권형준, 10213 신지호, 10214 안강현, 10220 최호진
 
 ## A* Algorithm
-https://github.com/lemonoyaa/Astaralgorithm/blob/main/A\*algorithm.c  
+https://github.com/lemonoyaa/Astaralgorithm/blob/main/A*algorithm.c  
 Made by. 10220 최호진
 
 ## BFS Algorithm
